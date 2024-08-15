@@ -1,0 +1,45 @@
+services:
+  nuxt-app:
+    build:
+      context: ./nuxt-app
+      target: dev
+    container_name: nuxt-app
+    restart: always
+    # environment:
+    #   WAIT_HOSTS: postgres:5432
+    # depends_on:
+    #   - postgres
+    ports:
+      - 3000:3000
+    networks:
+      - inventory-network
+    tmpfs:
+      - /tmp
+  web-server:
+    image: nginx:mainline-alpine
+    container_name: web-server
+    volumes:
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - nuxt-app
+    networks:
+      - inventory-network
+    ports:
+      - 80:80
+    restart: unless-stopped
+#   postgres:
+#     image: public.ecr.aws/docker/library/postgres:latest
+#     container_name: postgres
+#     volumes:
+#       - workflow-postgres-data:/var/lib/postgres/data
+#     environment:
+#       POSTGRES_PASSWORD: secret
+#       POSTgRES_USER: postgres
+#       POSTGRES_DB: workflow
+
+# volumes:
+#   workflow-postgres-data:
+
+networks:
+  inventory-network:
+    driver: bridge
